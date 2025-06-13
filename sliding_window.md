@@ -22,6 +22,82 @@ The sliding window technique is ideal for problems that involve:
 - **Window Size**: Can be fixed or variable depending on the problem
 - **Window State**: The current condition or properties of elements within the window
 
+## Visual Understanding
+
+### Basic Sliding Window Concept
+
+```
+Array: [1, 4, 2, 9, 5, 10, 3]
+Window Size: 3
+
+Step 1: Initial window
+[1, 4, 2] 9  5  10  3
+ ^     ^
+left  right
+Window sum = 1 + 4 + 2 = 7
+
+Step 2: Slide window right
+ 1 [4, 2, 9] 5  10  3
+    ^     ^
+   left  right
+Window sum = 4 + 2 + 9 = 15
+
+Step 3: Continue sliding
+ 1  4 [2, 9, 5] 10  3
+       ^     ^
+      left  right
+Window sum = 2 + 9 + 5 = 16
+
+Step 4: Keep sliding
+ 1  4  2 [9, 5, 10] 3
+          ^      ^
+         left   right
+Window sum = 9 + 5 + 10 = 24
+
+Step 5: Final position
+ 1  4  2  9 [5, 10, 3]
+             ^      ^
+            left   right
+Window sum = 5 + 10 + 3 = 18
+```
+
+### Two-Pointer Approach Visualization
+
+```
+Problem: Find longest substring without repeating characters
+String: "abcabcbb"
+
+Step 1: Start with empty window
+a b c a b c b b
+^
+left/right (window = "")
+
+Step 2: Expand window
+a b c a b c b b
+^ ^
+L R (window = "a")
+
+Step 3: Continue expanding
+a b c a b c b b
+^   ^
+L   R (window = "ab")
+
+Step 4: Keep expanding
+a b c a b c b b
+^     ^
+L     R (window = "abc")
+
+Step 5: Found duplicate 'a', shrink window
+a b c a b c b b
+  ^   ^
+  L   R (window = "bca")
+
+Step 6: Continue process...
+a b c a b c b b
+    ^ ^
+    L R (window = "a")
+```
+
 ## Step-by-Step Explanation
 
 1. **Define the Window Boundaries**
@@ -123,6 +199,49 @@ k = 3
 print(max_sum_subarray(arr, k))  # Output: 24 (9 + 5 + 10)
 ```
 
+**Step-by-Step Diagram for Fixed Window:**
+
+```
+Array: [1, 4, 2, 9, 5, 10, 3], k = 3
+
+Initial State:
+╔═══╤═══╤═══╗───┬───┬────┬───
+║ 1 │ 4 │ 2 ║ 9 │ 5 │ 10 │ 3
+╚═══╧═══╧═══╝───┴───┴────┴───
+ 0   1   2   3   4    5   6
+window_sum = 7, max_sum = 7
+
+Step 1: i = 3 (k = 3)
+    ╔═══╤═══╤═══╗───┬────┬───
+ 1  ║ 4 │ 2 │ 9 ║ 5 │ 10 │ 3
+    ╚═══╧═══╧═══╝───┴────┴───
+Remove arr[0] = 1, Add arr[3] = 9
+window_sum = 7 - 1 + 9 = 15, max_sum = 15
+
+Step 2: i = 4
+        ╔═══╤═══╤═══╗────┬───
+ 1   4  ║ 2 │ 9 │ 5 ║ 10 │ 3
+        ╚═══╧═══╧═══╝────┴───
+Remove arr[1] = 4, Add arr[4] = 5
+window_sum = 15 - 4 + 5 = 16, max_sum = 16
+
+Step 3: i = 5
+            ╔═══╤═══╤════╗───
+ 1   4   2  ║ 9 │ 5 │ 10 ║ 3
+            ╚═══╧═══╧════╝───
+Remove arr[2] = 2, Add arr[5] = 10
+window_sum = 16 - 2 + 10 = 24, max_sum = 24 ← Maximum!
+
+Step 4: i = 6
+                ╔═══╤════╤═══╗
+ 1   4   2   9  ║ 5 │ 10 │ 3 ║
+                ╚═══╧════╧═══╝
+Remove arr[3] = 9, Add arr[6] = 3
+window_sum = 24 - 9 + 3 = 18, max_sum remains 24
+
+Final Answer: 24
+```
+
 ### Example 2: Longest Substring Without Repeating Characters (Variable Window)
 
 ```python
@@ -146,6 +265,90 @@ def longest_substring_without_repeating(s):
 # Example usage
 s = "abcabcbb"
 print(longest_substring_without_repeating(s))  # Output: 3 ("abc")
+```
+
+**Step-by-Step Diagram for Variable Window:**
+
+```
+String: "abcabcbb"
+Goal: Find longest substring without repeating characters
+
+Initial State:
+a b c a b c b b
+^
+L=R=0, window="", char_set={}, max_length=0
+
+Step 1: Add 'a'
+a b c a b c b b
+^ ^
+L R   window="a", char_set={'a'}, max_length=1
+
+Step 2: Add 'b' (no duplicate)
+a b c a b c b b
+^   ^
+L   R   window="ab", char_set={'a','b'}, max_length=2
+
+Step 3: Add 'c' (no duplicate)
+a b c a b c b b
+^     ^
+L     R   window="abc", char_set={'a','b','c'}, max_length=3
+
+Step 4: Try to add 'a' (DUPLICATE found!)
+a b c a b c b b
+^       ^
+L       R   'a' already in char_set!
+
+Step 5: Shrink window (remove left 'a')
+a b c a b c b b
+  ^     ^
+  L     R   window="bc", char_set={'b','c'}
+
+Step 6: Now add 'a' (no duplicate)
+a b c a b c b b
+  ^     ^
+  L     R   window="bca", char_set={'b','c','a'}, max_length=3
+
+Step 7: Try to add 'b' (DUPLICATE found!)
+a b c a b c b b
+  ^       ^
+  L       R   'b' already in char_set!
+
+Step 8: Shrink window (remove left 'b')
+a b c a b c b b
+    ^     ^
+    L     R   window="ca", char_set={'c','a'}
+
+Step 9: Now add 'b' (no duplicate)
+a b c a b c b b
+    ^     ^
+    L     R   window="cab", char_set={'c','a','b'}, max_length=3
+
+Continue this process...
+
+Final State:
+Maximum length found: 3 (substring "abc")
+
+Window Expansion/Contraction Visualization:
+═══════════════════════════════════════════
+Expand →  ╔═══╤═══╤═══╗
+          ║ a │ b │ c ║ a b c b b    Valid window (no duplicates)
+          ╚═══╧═══╧═══╝
+
+Conflict!  ╔═══╤═══╤═══╤═══╗
+          ║ a │ b │ c │ a ║ b c b b   Invalid! 'a' appears twice
+          ╚═══╧═══╧═══╧═══╝
+
+Shrink ←      ╔═══╤═══╤═══╗
+          a  ║ b │ c │ a ║ b c b b    Valid again
+              ╚═══╧═══╧═══╝
+
+Expand →      ╔═══╤═══╤═══╤═══╗
+          a  ║ b │ c │ a │ b ║ c b b   Invalid! 'b' appears twice
+              ╚═══╧═══╧═══╧═══╝
+
+Shrink ←          ╔═══╤═══╤═══╗
+          a  b   ║ c │ a │ b ║ c b b   Valid again
+                  ╚═══╧═══╧═══╝
 ```
 
 ### Example 3: Minimum Window Substring (Advanced Variable Window)
@@ -201,6 +404,91 @@ def min_window_substring(s, t):
 s = "ADOBECODEBANC"
 t = "ABC"
 print(min_window_substring(s, t))  # Output: "BANC"
+```
+
+**Advanced Window Expansion/Contraction Diagram:**
+
+```
+Problem: Minimum Window Substring
+String s = "ADOBECODEBANC", Pattern t = "ABC"
+Need to find: Minimum window containing all characters A, B, C
+
+Phase 1: Expand until window is valid
+═══════════════════════════════════════════
+
+Step 1: Expand to find all required characters
+A D O B E C O D E B A N C
+^                     ^
+L                     R
+Window: "ADOBECODEBANC" ✓ Contains A, B, C (but not minimal)
+
+Phase 2: Contract while maintaining validity
+════════════════════════════════════════════
+
+Step 2: Try to shrink from left
+A D O B E C O D E B A N C
+  ^                   ^
+  L                   R
+Window: "DOBECODEBANC" ✗ Missing 'A'
+
+Step 3: Must include 'A', try different approach
+A D O B E C O D E B A N C
+^               ^
+L               R
+Window: "ADOBECODEB" ✗ Missing 'C'
+
+Step 4: Expand to include 'C'
+A D O B E C O D E B A N C
+^                     ^
+L                     R
+Window: "ADOBECODEBANC" ✓ Valid but long
+
+Step 5: Slide window to find "BANC"
+A D O B E C O D E B A N C
+                  ^     ^
+                  L     R
+Window: "BANC" ✓ Valid and minimal!
+
+Final Visualization:
+════════════════════
+Original: A D O B E C O D E B A N C
+Result:   ╔═════════════════════════╗
+          ║     Found: "BANC"      ║  ← Minimum window
+          ╚═════════════════════════╝
+
+Window State Transitions:
+═══════════════════════════
+INVALID → EXPAND → VALID → CONTRACT → OPTIMAL
+   ↓         ↓        ↓         ↓         ↓
+  Empty   Growing   Found    Shrinking  Minimal
+```
+
+## Window Behavior Patterns
+
+```
+Fixed Window Pattern:
+═══════════════════════
+[■■■]□□□□□□  →  □[■■■]□□□□□  →  □□[■■■]□□□□  →  □□□[■■■]□□□
+ Window      Window         Window         Window
+ size = 3    slides right   slides right   slides right
+
+Variable Window Pattern:
+═══════════════════════════
+Expanding:
+[■]□□□□□□□□  →  [■■]□□□□□□□  →  [■■■]□□□□□□  →  [■■■■]□□□□□
+
+Contracting (when condition violated):
+[■■■■■]□□□□  →  □[■■■■]□□□□  →  □□[■■■]□□□□  →  □□□[■■]□□□□
+
+Dynamic Expansion/Contraction:
+Window grows and shrinks based on problem conditions
+═══════════════════════════════════════════════════════
+Valid:   [■■■]          Invalid:  [■■■■■]
+         ↓ expand                 ↓ contract
+       [■■■■]                   [■■■■]
+         ↓ expand more            ↓ contract more
+       [■■■■■]                  [■■■]
+       Invalid!                 Valid again!
 ```
 
 ## Common Problem Patterns and Variations
