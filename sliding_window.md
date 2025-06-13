@@ -177,6 +177,83 @@ Uses additional data structures (like deque) to efficiently track max/min in the
 ### Example 1: Maximum Sum of Subarray of Size K (Fixed Window)
 
 ```python
+def max_sum_subarray_brute_force(arr, k):
+    if len(arr) < k:
+        return -1
+    
+    max_sum = float('-inf')
+    
+    # Try every possible window of size k
+    for i in range(len(arr) - k + 1):
+        current_sum = 0
+        # Calculate sum for current window
+        for j in range(i, i + k):
+            current_sum += arr[j]
+        max_sum = max(max_sum, current_sum)
+    
+    return max_sum
+
+# Time: O(n²), Space: O(1)
+```
+
+#### Brute Force Visual Diagram and Dry Run
+```
+Array: [1, 4, 2, 9, 5, 10, 3], k = 3
+
+The brute force approach tries every possible window of size k:
+
+Window 1 (i=0): Check subarray [1,4,2]
+[1, 4, 2, 9, 5, 10, 3]
+ ╔═══╤═══╤═══╗           ← Calculate: 1+4+2 = 7
+ ║ 1 │ 4 │ 2 ║
+ ╚═══╧═══╧═══╝
+max_sum = 7
+
+Window 2 (i=1): Check subarray [4,2,9]  
+[1, 4, 2, 9, 5, 10, 3]
+    ╔═══╤═══╤═══╗       ← Calculate: 4+2+9 = 15
+    ║ 4 │ 2 │ 9 ║
+    ╚═══╧═══╧═══╝
+max_sum = max(7, 15) = 15
+
+Window 3 (i=2): Check subarray [2,9,5]
+[1, 4, 2, 9, 5, 10, 3]
+       ╔═══╤═══╤═══╗    ← Calculate: 2+9+5 = 16  
+       ║ 2 │ 9 │ 5 ║
+       ╚═══╧═══╧═══╝
+max_sum = max(15, 16) = 16
+
+Window 4 (i=3): Check subarray [9,5,10]
+[1, 4, 2, 9, 5, 10, 3]
+          ╔═══╤═══╤════╗ ← Calculate: 9+5+10 = 24
+          ║ 9 │ 5 │ 10 ║
+          ╚═══╧═══╧════╝
+max_sum = max(16, 24) = 24
+
+Window 5 (i=4): Check subarray [5,10,3]
+[1, 4, 2, 9, 5, 10, 3]
+             ╔═══╤════╤═══╗ ← Calculate: 5+10+3 = 18
+             ║ 5 │ 10 │ 3 ║
+             ╚═══╧════╧═══╝
+max_sum = max(24, 18) = 24
+
+Brute Force Summary:
+═══════════════════════
+Total windows checked: 5
+Each window: O(k) time to calculate sum
+Total time: O(n-k+1) × O(k) = O(nk) ≈ O(n²) for k≈n
+Space: O(1)
+
+Problem: Recalculates overlapping elements multiple times!
+- Element at index 1 (value 4) calculated in windows 1 and 2
+- Element at index 2 (value 2) calculated in windows 1, 2, and 3
+- And so on...
+
+Final answer: 24
+```
+
+#### Optimized Sliding Window Approach
+```python
 def max_sum_subarray(arr, k):
     if len(arr) < k:
         return -1
@@ -193,10 +270,7 @@ def max_sum_subarray(arr, k):
     
     return max_sum
 
-# Example usage
-arr = [1, 4, 2, 9, 5, 10, 3]
-k = 3
-print(max_sum_subarray(arr, k))  # Output: 24 (9 + 5 + 10)
+# Time: O(n), Space: O(1)
 ```
 
 **Step-by-Step Diagram for Fixed Window:**
@@ -647,6 +721,85 @@ def min_subarray_len_brute_force(target, nums):
 # Time: O(n²), Space: O(1)
 ```
 
+#### Brute Force Visual Diagram and Dry Run
+```
+Array: [2,3,1,2,4,3], target = 7
+
+The brute force approach tries every possible starting position:
+
+Starting at index 0:
+[2,3,1,2,4,3]
+ ^
+Check [2]: sum = 2 < 7
+ ^ ^
+Check [2,3]: sum = 5 < 7
+ ^   ^
+Check [2,3,1]: sum = 6 < 7
+ ^     ^
+Check [2,3,1,2]: sum = 8 ≥ 7 ✓ → length = 4, min_len = 4
+
+Starting at index 1:
+[2,3,1,2,4,3]
+   ^
+Check [3]: sum = 3 < 7
+   ^ ^
+Check [3,1]: sum = 4 < 7
+   ^   ^
+Check [3,1,2]: sum = 6 < 7
+   ^     ^
+Check [3,1,2,4]: sum = 10 ≥ 7 ✓ → length = 4, min_len = 4
+
+Starting at index 2:
+[2,3,1,2,4,3]
+     ^
+Check [1]: sum = 1 < 7
+     ^ ^
+Check [1,2]: sum = 3 < 7
+     ^   ^
+Check [1,2,4]: sum = 7 ≥ 7 ✓ → length = 3, min_len = 3
+
+Starting at index 3:
+[2,3,1,2,4,3]
+       ^
+Check [2]: sum = 2 < 7
+       ^ ^
+Check [2,4]: sum = 6 < 7
+       ^   ^
+Check [2,4,3]: sum = 9 ≥ 7 ✓ → length = 3, min_len = 3
+
+Starting at index 4:
+[2,3,1,2,4,3]
+         ^
+Check [4]: sum = 4 < 7
+         ^ ^
+Check [4,3]: sum = 7 ≥ 7 ✓ → length = 2, min_len = 2 ← Best!
+
+Starting at index 5:
+[2,3,1,2,4,3]
+           ^
+Check [3]: sum = 3 < 7 → No valid subarray from here
+
+Brute Force Summary:
+══════════════════
+Checks performed:
+- Index 0: 4 subarrays checked
+- Index 1: 4 subarrays checked  
+- Index 2: 3 subarrays checked
+- Index 3: 3 subarrays checked
+- Index 4: 2 subarrays checked
+- Index 5: 1 subarray checked
+Total: 17 subarray sum calculations
+
+Time complexity: O(n²) - nested loops
+Space complexity: O(1)
+
+Inefficiency: Recalculates overlapping sums!
+Example: sum([2,3]) calculated when starting at index 0, 
+then sum([3]) recalculated when starting at index 1
+
+Final answer: 2 (subarray [4,3])
+```
+
 #### Optimized Sliding Window Approach
 ```python
 def min_subarray_len_optimized(target, nums):
@@ -769,6 +922,70 @@ def longest_substring_k_distinct_brute_force(s, k):
 # Time: O(n²), Space: O(k)
 ```
 
+#### Brute Force Visual Diagram and Dry Run
+```
+String: "eceba", k = 2
+
+The brute force approach tries every possible starting position:
+
+Starting at index 0 ('e'):
+e c e b a
+^
+Check "e": distinct = {'e':1} → 1 ≤ 2 ✓, length = 1
+^ ^  
+Check "ec": distinct = {'e':1, 'c':1} → 2 ≤ 2 ✓, length = 2
+^   ^
+Check "ece": distinct = {'e':2, 'c':1} → 2 ≤ 2 ✓, length = 3
+^     ^
+Check "eceb": distinct = {'e':2, 'c':1, 'b':1} → 3 > 2 ✗, break
+Max from index 0 = 3
+
+Starting at index 1 ('c'):
+e c e b a
+  ^
+Check "c": distinct = {'c':1} → 1 ≤ 2 ✓, length = 1
+  ^ ^
+Check "ce": distinct = {'c':1, 'e':1} → 2 ≤ 2 ✓, length = 2
+  ^   ^
+Check "ceb": distinct = {'c':1, 'e':1, 'b':1} → 3 > 2 ✗, break
+Max from index 1 = 2
+
+Starting at index 2 ('e'):
+e c e b a
+    ^
+Check "e": distinct = {'e':1} → 1 ≤ 2 ✓, length = 1
+    ^ ^
+Check "eb": distinct = {'e':1, 'b':1} → 2 ≤ 2 ✓, length = 2
+    ^   ^
+Check "eba": distinct = {'e':1, 'b':1, 'a':1} → 3 > 2 ✗, break
+Max from index 2 = 2
+
+Starting at index 3 ('b'):
+e c e b a
+      ^
+Check "b": distinct = {'b':1} → 1 ≤ 2 ✓, length = 1
+      ^ ^
+Check "ba": distinct = {'b':1, 'a':1} → 2 ≤ 2 ✓, length = 2
+Max from index 3 = 2
+
+Starting at index 4 ('a'):
+e c e b a
+        ^
+Check "a": distinct = {'a':1} → 1 ≤ 2 ✓, length = 1
+Max from index 4 = 1
+
+Brute Force Summary:
+══════════════════
+Starting positions checked: 5
+For each position: Build character count from scratch
+Redundant work: char_count rebuilt for overlapping substrings
+
+Time complexity: O(n²) for nested loops
+Space complexity: O(k) for character count dictionary
+
+Maximum length found: 3 (substring "ece")
+```
+
 #### Optimized Sliding Window Approach
 ```python
 def longest_substring_k_distinct_optimized(s, k):
@@ -795,6 +1012,83 @@ def longest_substring_k_distinct_optimized(s, k):
     return max_len
 
 # Time: O(n), Space: O(k)
+```
+
+#### Brute Force Visual Diagram and Dry Run
+```
+String: "abcabcbb"
+
+The brute force approach tries every possible starting position:
+
+Starting at index 0:
+a b c a b c b b
+^
+Check substring "a": length = 1, unique chars = 1 ✓
+a b c a b c b b
+^ ^
+Check substring "ab": length = 2, unique chars = 2 ✓
+a b c a b c b b
+^   ^
+Check substring "abc": length = 3, unique chars = 3 ✓
+a b c a b c b b
+^     ^
+Check substring "abca": length = 4, unique chars = 3 (duplicate 'a') ✗
+Stop here. Max from index 0 = 3
+
+Starting at index 1:
+a b c a b c b b
+  ^
+Check substring "b": length = 1, unique chars = 1 ✓
+a b c a b c b b
+  ^ ^
+Check substring "bc": length = 2, unique chars = 2 ✓
+a b c a b c b b
+  ^   ^
+Check substring "bca": length = 3, unique chars = 3 ✓
+a b c a b c b b
+  ^     ^
+Check substring "bcab": length = 4, unique chars = 3 (duplicate 'b') ✗
+Stop here. Max from index 1 = 3
+
+Starting at index 2:
+a b c a b c b b
+    ^
+Check substring "c": length = 1, unique chars = 1 ✓
+a b c a b c b b
+    ^ ^
+Check substring "ca": length = 2, unique chars = 2 ✓
+a b c a b c b b
+    ^   ^
+Check substring "cab": length = 3, unique chars = 3 ✓
+a b c a b c b b
+    ^     ^
+Check substring "cabc": length = 4, unique chars = 3 (duplicate 'c') ✗
+Stop here. Max from index 2 = 3
+
+... Continue for all starting positions ...
+
+Starting at index 5:
+a b c a b c b b
+          ^
+Check substring "c": length = 1, unique chars = 1 ✓
+a b c a b c b b
+          ^ ^
+Check substring "cb": length = 2, unique chars = 2 ✓
+a b c a b c b b
+          ^   ^
+Check substring "cbb": length = 3, unique chars = 2 (duplicate 'b') ✗
+Stop here. Max from index 5 = 2
+
+Brute Force Summary:
+══════════════════
+Total starting positions: 8
+For each position: Check all possible endings
+Time complexity: O(n²) - for each of n positions, check up to n characters
+Space complexity: O(k) - to store character set
+
+Inefficiency: Recalculates character sets from scratch for each substring!
+
+Final answer: 3 (substring "abc")
 ```
 
 #### Visual Diagram and Dry Run
@@ -885,6 +1179,86 @@ def find_anagrams_brute_force(s, p):
     return result
 
 # Time: O(n * m), Space: O(m) where n = len(s), m = len(p)
+```
+
+#### Brute Force Visual Diagram and Dry Run
+```
+String s = "cbaebabacd", Pattern p = "abc"
+p_count = {'a': 1, 'b': 1, 'c': 1}, p_len = 3
+
+The brute force approach checks every possible window of size p_len:
+
+Position 0: Check substring s[0:3] = "cba"
+c b a e b a b a c d
+╔═══╤═══╤═══╗
+║ c │ b │ a ║ → Counter = {'c':1, 'b':1, 'a':1}
+╚═══╧═══╧═══╝
+Compare: {'c':1, 'b':1, 'a':1} == {'a':1, 'b':1, 'c':1} ✓
+result = [0]
+
+Position 1: Check substring s[1:4] = "bae"  
+c b a e b a b a c d
+  ╔═══╤═══╤═══╗
+  ║ b │ a │ e ║ → Counter = {'b':1, 'a':1, 'e':1}
+  ╚═══╧═══╧═══╝
+Compare: {'b':1, 'a':1, 'e':1} == {'a':1, 'b':1, 'c':1} ✗
+
+Position 2: Check substring s[2:5] = "aeb"
+c b a e b a b a c d
+    ╔═══╤═══╤═══╗
+    ║ a │ e │ b ║ → Counter = {'a':1, 'e':1, 'b':1}
+    ╚═══╧═══╧═══╝
+Compare: {'a':1, 'e':1, 'b':1} == {'a':1, 'b':1, 'c':1} ✗
+
+Position 3: Check substring s[3:6] = "eba"
+c b a e b a b a c d
+      ╔═══╤═══╤═══╗
+      ║ e │ b │ a ║ → Counter = {'e':1, 'b':1, 'a':1}
+      ╚═══╧═══╧═══╝
+Compare: {'e':1, 'b':1, 'a':1} == {'a':1, 'b':1, 'c':1} ✗
+
+Position 4: Check substring s[4:7] = "bab"
+c b a e b a b a c d
+        ╔═══╤═══╤═══╗
+        ║ b │ a │ b ║ → Counter = {'b':2, 'a':1}
+        ╚═══╧═══╧═══╝
+Compare: {'b':2, 'a':1} == {'a':1, 'b':1, 'c':1} ✗
+
+Position 5: Check substring s[5:8] = "aba"
+c b a e b a b a c d
+          ╔═══╤═══╤═══╗
+          ║ a │ b │ a ║ → Counter = {'a':2, 'b':1}
+          ╚═══╧═══╧═══╝
+Compare: {'a':2, 'b':1} == {'a':1, 'b':1, 'c':1} ✗
+
+Position 6: Check substring s[6:9] = "bac"
+c b a e b a b a c d
+            ╔═══╤═══╤═══╗
+            ║ b │ a │ c ║ → Counter = {'b':1, 'a':1, 'c':1}
+            ╚═══╧═══╧═══╝
+Compare: {'b':1, 'a':1, 'c':1} == {'a':1, 'b':1, 'c':1} ✓
+result = [0, 6]
+
+Position 7: Check substring s[7:10] = "acd"
+c b a e b a b a c d
+              ╔═══╤═══╤═══╗
+              ║ a │ c │ d ║ → Counter = {'a':1, 'c':1, 'd':1}
+              ╚═══╧═══╧═══╝
+Compare: {'a':1, 'c':1, 'd':1} == {'a':1, 'b':1, 'c':1} ✗
+
+Brute Force Summary:
+══════════════════
+Total positions checked: 8 (from 0 to len(s)-len(p))
+For each position: Create Counter object O(m) time
+Total time: 8 × 3 = 24 character frequency calculations
+
+Time complexity: O(n × m) where n=len(s), m=len(p)
+Space complexity: O(m) for Counter objects
+
+Inefficiency: Recreates character count for each window!
+Many characters are recounted multiple times.
+
+Final result: [0, 6] (anagrams found at positions 0 and 6)
 ```
 
 #### Optimized Sliding Window Approach
@@ -1075,6 +1449,90 @@ def longest_ones_brute_force(nums, k):
     return max_length
 
 # Time: O(n²), Space: O(1)
+```
+
+#### Brute Force Visual Diagram and Dry Run
+```
+Array: [1,1,1,0,0,0,1,1,1,1,0], k = 2
+
+The brute force approach tries every possible starting position:
+
+Starting at index 0:
+[1,1,1,0,0,0,1,1,1,1,0]
+ ^
+Check [1]: zeros = 0 ≤ 2 ✓, length = 1
+ ^ ^
+Check [1,1]: zeros = 0 ≤ 2 ✓, length = 2
+ ^   ^
+Check [1,1,1]: zeros = 0 ≤ 2 ✓, length = 3
+ ^     ^
+Check [1,1,1,0]: zeros = 1 ≤ 2 ✓, length = 4
+ ^       ^
+Check [1,1,1,0,0]: zeros = 2 ≤ 2 ✓, length = 5
+ ^         ^
+Check [1,1,1,0,0,0]: zeros = 3 > 2 ✗, break
+Max from index 0 = 5
+
+Starting at index 1:
+[1,1,1,0,0,0,1,1,1,1,0]
+   ^
+Check [1]: zeros = 0 ≤ 2 ✓, length = 1
+   ^ ^
+Check [1,1]: zeros = 0 ≤ 2 ✓, length = 2
+   ^   ^
+Check [1,1,0]: zeros = 1 ≤ 2 ✓, length = 3
+   ^     ^
+Check [1,1,0,0]: zeros = 2 ≤ 2 ✓, length = 4
+   ^       ^
+Check [1,1,0,0,0]: zeros = 3 > 2 ✗, break
+Max from index 1 = 4
+
+Starting at index 6:
+[1,1,1,0,0,0,1,1,1,1,0]
+             ^
+Check [1]: zeros = 0 ≤ 2 ✓, length = 1
+             ^ ^
+Check [1,1]: zeros = 0 ≤ 2 ✓, length = 2
+             ^   ^
+Check [1,1,1]: zeros = 0 ≤ 2 ✓, length = 3
+             ^     ^
+Check [1,1,1,1]: zeros = 0 ≤ 2 ✓, length = 4
+             ^       ^
+Check [1,1,1,1,0]: zeros = 1 ≤ 2 ✓, length = 5
+Max from index 6 = 5
+
+... Continue for all starting positions ...
+
+Key insight: Best subarray might span across zero positions
+Example: indices 4-9 = [0,0,1,1,1,1] has 2 zeros and length 6!
+
+Starting at index 4:
+[1,1,1,0,0,0,1,1,1,1,0]
+         ^
+Check [0]: zeros = 1 ≤ 2 ✓, length = 1
+         ^ ^
+Check [0,0]: zeros = 2 ≤ 2 ✓, length = 2
+         ^   ^
+Check [0,0,1]: zeros = 2 ≤ 2 ✓, length = 3
+         ^     ^
+Check [0,0,1,1]: zeros = 2 ≤ 2 ✓, length = 4
+         ^       ^
+Check [0,0,1,1,1]: zeros = 2 ≤ 2 ✓, length = 5
+         ^         ^
+Check [0,0,1,1,1,1]: zeros = 2 ≤ 2 ✓, length = 6 ← Maximum!
+         ^           ^
+Check [0,0,1,1,1,1,0]: zeros = 3 > 2 ✗, break
+
+Brute Force Summary:
+══════════════════
+Total starting positions: 11
+For each position: Check subarrays until too many zeros
+Time: O(n²) - nested loops
+Space: O(1) - only counter variable
+
+Inefficiency: Recounts zeros for overlapping subarrays!
+
+Final answer: 6 (subarray [0,0,1,1,1,1] from indices 4-9)
 ```
 
 #### Optimized Sliding Window Approach
@@ -1435,6 +1893,84 @@ def num_subarrays_with_product_less_than_k_brute_force(nums, k):
     return count
 
 # Time: O(n²), Space: O(1)
+```
+
+#### Brute Force Visual Diagram and Dry Run
+```
+Array: [10,5,2,6], k = 100
+
+The brute force approach tries every possible starting position:
+
+Starting at index 0 (value 10):
+[10,5,2,6]
+ ^
+Check [10]: product = 10 < 100 ✓, count = 1
+ ^ ^
+Check [10,5]: product = 50 < 100 ✓, count = 2  
+ ^   ^
+Check [10,5,2]: product = 100 ≥ 100 ✗, break
+Valid subarrays from index 0: [10], [10,5]
+
+Starting at index 1 (value 5):
+[10,5,2,6]
+   ^
+Check [5]: product = 5 < 100 ✓, count = 3
+   ^ ^
+Check [5,2]: product = 10 < 100 ✓, count = 4
+   ^   ^
+Check [5,2,6]: product = 60 < 100 ✓, count = 5
+Valid subarrays from index 1: [5], [5,2], [5,2,6]
+
+Starting at index 2 (value 2):
+[10,5,2,6]
+     ^
+Check [2]: product = 2 < 100 ✓, count = 6
+     ^ ^
+Check [2,6]: product = 12 < 100 ✓, count = 7
+Valid subarrays from index 2: [2], [2,6]
+
+Starting at index 3 (value 6):
+[10,5,2,6]
+       ^
+Check [6]: product = 6 < 100 ✓, count = 8
+Valid subarrays from index 3: [6]
+
+Complete List of Valid Subarrays:
+═══════════════════════════════
+From index 0: [10], [10,5]                    → 2 subarrays
+From index 1: [5], [5,2], [5,2,6]             → 3 subarrays  
+From index 2: [2], [2,6]                      → 2 subarrays
+From index 3: [6]                             → 1 subarray
+                                    Total: 8 subarrays
+
+Verification of products:
+[10] = 10 ✓
+[10,5] = 50 ✓
+[5] = 5 ✓
+[5,2] = 10 ✓
+[5,2,6] = 60 ✓
+[2] = 2 ✓  
+[2,6] = 12 ✓
+[6] = 6 ✓
+
+Brute Force Summary:
+══════════════════
+Total starting positions: 4
+Product calculations performed:
+- Index 0: 3 calculations (stopped when product ≥ k)
+- Index 1: 3 calculations (all valid)
+- Index 2: 2 calculations (all valid)  
+- Index 3: 1 calculation (all valid)
+Total: 9 product calculations
+
+Time complexity: O(n²) - nested loops
+Space complexity: O(1) - only counter variables
+
+Inefficiency: Recalculates products for overlapping subarrays!
+Example: product of [5] calculated separately when starting at index 1,
+but it was already part of [10,5] calculation from index 0.
+
+Final answer: 8
 ```
 
 #### Optimized Sliding Window Approach
