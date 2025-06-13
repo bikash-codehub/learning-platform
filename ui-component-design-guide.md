@@ -163,6 +163,314 @@ This guide outlines the principles, patterns, and system design concepts for cre
 - Type checking (TypeScript)
 - Code review processes
 
+## Practical Examples: Component Design Process
+
+### Example 1: Designing a Data Table Component
+
+#### Step 1: Requirements Analysis
+**Business Need**: Display tabular data with sorting, filtering, and pagination
+
+**Questions to Ask**:
+- What types of data will be displayed?
+- What interactions are needed (sorting, filtering, selection)?
+- How much data will be displayed at once?
+- What devices will this be used on?
+
+#### Step 2: Component Planning
+```
+DataTable (Organism)
+├── TableHeader (Molecule)
+│   ├── HeaderCell (Atom)
+│   └── SortIcon (Atom)
+├── TableBody (Molecule)
+│   └── TableRow (Molecule)
+│       └── TableCell (Atom)
+├── TablePagination (Molecule)
+│   ├── Button (Atom)
+│   └── PageInfo (Atom)
+└── TableFilters (Molecule)
+    └── FilterInput (Atom)
+```
+
+#### Step 3: Props Interface Design
+```javascript
+interface DataTableProps {
+  // Data
+  data: Array<Record<string, any>>;
+  columns: Column[];
+  
+  // Functionality
+  sortable?: boolean;
+  filterable?: boolean;
+  selectable?: boolean;
+  paginated?: boolean;
+  
+  // Customization
+  className?: string;
+  rowsPerPage?: number;
+  
+  // Events
+  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  onFilter?: (filters: Record<string, any>) => void;
+  onSelect?: (selectedRows: any[]) => void;
+}
+```
+
+#### Step 4: State Management Planning
+```javascript
+// Internal state
+const [sortConfig, setSortConfig] = useState({ column: null, direction: 'asc' });
+const [filters, setFilters] = useState({});
+const [selectedRows, setSelectedRows] = useState([]);
+const [currentPage, setCurrentPage] = useState(1);
+
+// Derived state
+const filteredData = useMemo(() => applyFilters(data, filters), [data, filters]);
+const sortedData = useMemo(() => applySorting(filteredData, sortConfig), [filteredData, sortConfig]);
+const paginatedData = useMemo(() => paginate(sortedData, currentPage, rowsPerPage), [sortedData, currentPage, rowsPerPage]);
+```
+
+### Example 2: Designing a Modal Component
+
+#### Step 1: Requirements Analysis
+**Business Need**: Display overlay content with various use cases (confirmation, forms, image preview)
+
+**Thinking Process**:
+- Modal should be flexible enough for different content types
+- Need to handle focus management for accessibility
+- Should support different sizes and animations
+- Must handle escape key and backdrop clicks
+
+#### Step 2: API Design Thinking
+```javascript
+// Option 1: Imperative API
+const modal = useModal();
+modal.open(<ConfirmDialog />);
+
+// Option 2: Declarative API (chosen)
+<Modal isOpen={isOpen} onClose={handleClose}>
+  <ConfirmDialog />
+</Modal>
+
+// Why declarative? Better fits React's model and easier to reason about
+```
+
+#### Step 3: Implementation Strategy
+```javascript
+const Modal = ({ isOpen, onClose, size = 'medium', children }) => {
+  // Focus management
+  const modalRef = useRef();
+  const previousFocusRef = useRef();
+  
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement;
+      modalRef.current?.focus();
+    } else {
+      previousFocusRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  // Escape key handling
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="modal-backdrop" onClick={onClose}>
+      <div 
+        ref={modalRef}
+        className={`modal modal--${size}`}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+      >
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+};
+```
+
+### Example 3: Thinking Through a Form Input Component
+
+#### Step 1: Analysis
+**Requirements**: Reusable input with validation, different types, consistent styling
+
+**Thinking Process**:
+- Should it handle its own validation or receive validation from parent?
+- How to handle different input types (text, email, password, etc.)?
+- How to display error states and messages?
+- Should it be controlled or uncontrolled?
+
+#### Step 2: Design Decisions
+```javascript
+// Decision: Controlled component with external validation
+// Reasoning: More flexible, follows React patterns, easier to test
+
+interface InputProps {
+  // Core functionality
+  value: string;
+  onChange: (value: string) => void;
+  
+  // Input configuration
+  type?: 'text' | 'email' | 'password' | 'number';
+  placeholder?: string;
+  disabled?: boolean;
+  required?: boolean;
+  
+  // Validation
+  error?: string;
+  valid?: boolean;
+  
+  // Accessibility
+  label: string;
+  id?: string;
+  'aria-describedby'?: string;
+  
+  // Styling
+  variant?: 'outlined' | 'filled' | 'standard';
+  size?: 'small' | 'medium' | 'large';
+}
+```
+
+#### Step 3: Component Structure Planning
+```javascript
+const Input = ({
+  value,
+  onChange,
+  label,
+  error,
+  id,
+  className,
+  ...props
+}) => {
+  const inputId = id || useId();
+  const errorId = error ? `${inputId}-error` : undefined;
+  
+  return (
+    <div className={cn('input-wrapper', className, {
+      'input-wrapper--error': error,
+      'input-wrapper--disabled': props.disabled
+    })}>
+      <label htmlFor={inputId} className="input-label">
+        {label}
+        {props.required && <span aria-label="required">*</span>}
+      </label>
+      
+      <input
+        {...props}
+        id={inputId}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="input-field"
+        aria-invalid={!!error}
+        aria-describedby={errorId}
+      />
+      
+      {error && (
+        <div id={errorId} className="input-error" role="alert">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### Design Thinking Framework
+
+#### 1. Start with User Needs
+- What problem does this component solve?
+- Who will use it and in what context?
+- What are the edge cases and error scenarios?
+
+#### 2. API Design First
+- How should developers interact with your component?
+- What props are essential vs. optional?
+- How can you make the API intuitive and consistent?
+
+#### 3. Break Down Complexity
+- Can this be split into smaller components?
+- What can be reused across different contexts?
+- Where should state live?
+
+#### 4. Consider Non-Functional Requirements
+- Performance implications
+- Accessibility requirements
+- Browser compatibility
+- Responsive behavior
+
+#### 5. Plan for Change
+- How will this component evolve?
+- What customization points are needed?
+- How can you maintain backward compatibility?
+
+### Common Anti-Patterns to Avoid
+
+#### 1. The "God Component"
+```javascript
+// ❌ Bad: Component doing too much
+const UserProfile = ({ userId }) => {
+  const [user, setUser] = useState();
+  const [posts, setPosts] = useState();
+  const [friends, setFriends] = useState();
+  // ... handles data fetching, form submission, navigation, etc.
+  
+  return (
+    <div>
+      {/* 500+ lines of JSX */}
+    </div>
+  );
+};
+
+// ✅ Good: Single responsibility
+const UserProfile = ({ user }) => (
+  <div>
+    <UserHeader user={user} />
+    <UserPosts userId={user.id} />
+    <UserFriends userId={user.id} />
+  </div>
+);
+```
+
+#### 2. Props Explosion
+```javascript
+// ❌ Bad: Too many individual props
+const Button = ({
+  backgroundColor,
+  textColor,
+  borderColor,
+  hoverBackgroundColor,
+  hoverTextColor,
+  fontSize,
+  fontWeight,
+  padding,
+  margin,
+  borderRadius,
+  // ... 20+ more props
+}) => { /* ... */ };
+
+// ✅ Good: Variant-based design
+const Button = ({
+  variant = 'primary',
+  size = 'medium',
+  children,
+  ...props
+}) => { /* ... */ };
+```
+
 ## Implementation Checklist
 
 ### Before Building
