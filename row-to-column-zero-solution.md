@@ -197,49 +197,61 @@ Step 16: Zero out Column 3
 FINAL RESULT: [[1,2,0,0], [0,0,0,0], [0,0,0,0]]
 ```
 
-### 💻 Simple Code with Detailed Comments
-```python
-def setZeroes_simple(matrix):
-    if not matrix:
-        return matrix
-    
-    rows, cols = len(matrix), len(matrix[0])
-    
-    # Phase 1: Scout for zeros
-    zero_rows = set()  # Remember which rows have zeros
-    zero_cols = set()  # Remember which columns have zeros
-    
-    print("🔍 PHASE 1: Scouting for zeros...")
-    for i in range(rows):
-        for j in range(cols):
-            print(f"   Checking position ({i},{j}) = {matrix[i][j]}")
-            if matrix[i][j] == 0:
-                print(f"   🚨 ZERO FOUND at ({i},{j})!")
-                zero_rows.add(i)
-                zero_cols.add(j)
-                print(f"   📝 Added row {i} and column {j} to cleanup list")
-    
-    print(f"\n📝 CLEANUP LIST:")
-    print(f"   Rows to zero: {sorted(zero_rows)}")
-    print(f"   Columns to zero: {sorted(zero_cols)}")
-    
-    # Phase 2: Zero out rows
-    print(f"\n🧹 PHASE 2: Zeroing rows...")
-    for row in zero_rows:
-        print(f"   Zeroing row {row}: {matrix[row]} → ", end="")
-        for j in range(cols):
-            matrix[row][j] = 0
-        print(f"{matrix[row]} ✅")
-    
-    # Phase 3: Zero out columns  
-    print(f"\n🧹 PHASE 3: Zeroing columns...")
-    for col in zero_cols:
-        print(f"   Zeroing column {col}...")
-        for i in range(rows):
-            matrix[i][col] = 0
-        print(f"   ✅ Column {col} zeroed!")
-    
-    return matrix
+### 💻 Simple Java Code with Detailed Comments
+```java
+import java.util.*;
+
+public class Solution {
+    public void setZeroesSimple(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) {
+            return;
+        }
+        
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        
+        // Phase 1: Scout for zeros
+        Set<Integer> zeroRows = new HashSet<>();  // Remember which rows have zeros
+        Set<Integer> zeroCols = new HashSet<>();  // Remember which columns have zeros
+        
+        System.out.println("🔍 PHASE 1: Scouting for zeros...");
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                System.out.println("   Checking position (" + i + "," + j + ") = " + matrix[i][j]);
+                if (matrix[i][j] == 0) {
+                    System.out.println("   🚨 ZERO FOUND at (" + i + "," + j + ")!");
+                    zeroRows.add(i);
+                    zeroCols.add(j);
+                    System.out.println("   📝 Added row " + i + " and column " + j + " to cleanup list");
+                }
+            }
+        }
+        
+        System.out.println("\n📝 CLEANUP LIST:");
+        System.out.println("   Rows to zero: " + new ArrayList<>(zeroRows));
+        System.out.println("   Columns to zero: " + new ArrayList<>(zeroCols));
+        
+        // Phase 2: Zero out rows
+        System.out.println("\n🧹 PHASE 2: Zeroing rows...");
+        for (int row : zeroRows) {
+            System.out.print("   Zeroing row " + row + ": " + Arrays.toString(matrix[row]) + " → ");
+            for (int j = 0; j < cols; j++) {
+                matrix[row][j] = 0;
+            }
+            System.out.println(Arrays.toString(matrix[row]) + " ✅");
+        }
+        
+        // Phase 3: Zero out columns  
+        System.out.println("\n🧹 PHASE 3: Zeroing columns...");
+        for (int col : zeroCols) {
+            System.out.println("   Zeroing column " + col + "...");
+            for (int i = 0; i < rows; i++) {
+                matrix[i][col] = 0;
+            }
+            System.out.println("   ✅ Column " + col + " zeroed!");
+        }
+    }
+}
 ```
 
 ### 🎯 Detailed Dry Run Table
@@ -408,74 +420,93 @@ Step 12: Check if we need to zero first column
 └─────────────────────┘    
 ```
 
-### 💻 Optimized Code with Detailed Comments
-```python
-def setZeroes_optimized(matrix):
-    if not matrix:
-        return matrix
-    
-    rows, cols = len(matrix), len(matrix[0])
-    
-    # Phase 1: Check original state of margins
-    first_row_had_zero = False
-    first_col_had_zero = False
-    
-    print("🔍 PHASE 1: Checking original state of margins...")
-    
-    # Check first row
-    for j in range(cols):
-        if matrix[0][j] == 0:
-            first_row_had_zero = True
-            print(f"   First row had zero at column {j}")
-            break
-    
-    # Check first column  
-    for i in range(rows):
-        if matrix[i][0] == 0:
-            first_col_had_zero = True
-            print(f"   First column had zero at row {i}")
-            break
-    
-    print(f"   first_row_had_zero: {first_row_had_zero}")
-    print(f"   first_col_had_zero: {first_col_had_zero}")
-    
-    # Phase 2: Use margins as notepad
-    print(f"\n📝 PHASE 2: Using margins as notepad...")
-    for i in range(1, rows):  # Skip first row
-        for j in range(1, cols):  # Skip first column
-            if matrix[i][j] == 0:
-                print(f"   Found zero at ({i},{j})")
-                print(f"   📝 Making note: matrix[{i}][0] = 0 (row {i} needs zero)")
-                print(f"   📝 Making note: matrix[0][{j}] = 0 (col {j} needs zero)")
-                matrix[i][0] = 0  # Note: this row needs zero
-                matrix[0][j] = 0  # Note: this column needs zero
-    
-    # Phase 3: Read notes and apply zeros
-    print(f"\n📖 PHASE 3: Reading notes and applying zeros...")
-    for i in range(1, rows):
-        for j in range(1, cols):
-            if matrix[i][0] == 0 or matrix[0][j] == 0:
-                print(f"   Position ({i},{j}): ", end="")
-                if matrix[i][0] == 0:
-                    print(f"row {i} marked ", end="")
-                if matrix[0][j] == 0:
-                    print(f"col {j} marked ", end="")
-                print(f"→ Set to 0")
-                matrix[i][j] = 0
-    
-    # Phase 4: Handle first row and column
-    print(f"\n🎯 PHASE 4: Handling first row and column...")
-    if first_row_had_zero:
-        print("   Zeroing first row (it originally had zeros)")
-        for j in range(cols):
-            matrix[0][j] = 0
-    
-    if first_col_had_zero:
-        print("   Zeroing first column (it originally had zeros)")
-        for i in range(rows):
-            matrix[i][0] = 0
-    
-    return matrix
+### 💻 Optimized Java Code with Detailed Comments
+```java
+public class Solution {
+    public void setZeroesOptimized(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) {
+            return;
+        }
+        
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        
+        // Phase 1: Check original state of margins
+        boolean firstRowHadZero = false;
+        boolean firstColHadZero = false;
+        
+        System.out.println("🔍 PHASE 1: Checking original state of margins...");
+        
+        // Check first row
+        for (int j = 0; j < cols; j++) {
+            if (matrix[0][j] == 0) {
+                firstRowHadZero = true;
+                System.out.println("   First row had zero at column " + j);
+                break;
+            }
+        }
+        
+        // Check first column  
+        for (int i = 0; i < rows; i++) {
+            if (matrix[i][0] == 0) {
+                firstColHadZero = true;
+                System.out.println("   First column had zero at row " + i);
+                break;
+            }
+        }
+        
+        System.out.println("   firstRowHadZero: " + firstRowHadZero);
+        System.out.println("   firstColHadZero: " + firstColHadZero);
+        
+        // Phase 2: Use margins as notepad
+        System.out.println("\n📝 PHASE 2: Using margins as notepad...");
+        for (int i = 1; i < rows; i++) {  // Skip first row
+            for (int j = 1; j < cols; j++) {  // Skip first column
+                if (matrix[i][j] == 0) {
+                    System.out.println("   Found zero at (" + i + "," + j + ")");
+                    System.out.println("   📝 Making note: matrix[" + i + "][0] = 0 (row " + i + " needs zero)");
+                    System.out.println("   📝 Making note: matrix[0][" + j + "] = 0 (col " + j + " needs zero)");
+                    matrix[i][0] = 0;  // Note: this row needs zero
+                    matrix[0][j] = 0;  // Note: this column needs zero
+                }
+            }
+        }
+        
+        // Phase 3: Read notes and apply zeros
+        System.out.println("\n📖 PHASE 3: Reading notes and applying zeros...");
+        for (int i = 1; i < rows; i++) {
+            for (int j = 1; j < cols; j++) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    System.out.print("   Position (" + i + "," + j + "): ");
+                    if (matrix[i][0] == 0) {
+                        System.out.print("row " + i + " marked ");
+                    }
+                    if (matrix[0][j] == 0) {
+                        System.out.print("col " + j + " marked ");
+                    }
+                    System.out.println("→ Set to 0");
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        
+        // Phase 4: Handle first row and column
+        System.out.println("\n🎯 PHASE 4: Handling first row and column...");
+        if (firstRowHadZero) {
+            System.out.println("   Zeroing first row (it originally had zeros)");
+            for (int j = 0; j < cols; j++) {
+                matrix[0][j] = 0;
+            }
+        }
+        
+        if (firstColHadZero) {
+            System.out.println("   Zeroing first column (it originally had zeros)");
+            for (int i = 0; i < rows; i++) {
+                matrix[i][0] = 0;
+            }
+        }
+    }
+}
 ```
 
 ### 🎯 Detailed Dry Run Table (Optimized Approach)
@@ -499,6 +530,187 @@ def setZeroes_optimized(matrix):
 
 ---
 
+## 🚀 Approach 3: Alternative Optimized Way (In-Place Marking)
+
+### 🎯 The Creative Strategy
+This approach uses a clever trick: **mark zeros by changing them to -1 temporarily**, then use a while loop to convert all -1s back to 0s while spreading the contamination.
+
+**Key Insight:** We use -1 as a temporary marker to distinguish between original zeros and newly created zeros.
+
+### 🧠 The Clever Process
+
+```
+Step-by-step idea:
+1. 🔍 Find zeros and mark them as -1
+2. 🌊 For each -1, spread contamination (set row/column to -1)  
+3. 🔄 Keep spreading until no new -1s are created
+4. 🎯 Convert all -1s back to 0s
+```
+
+### 🎬 Animated Step-by-Step Walkthrough
+
+Starting with Java 2D array: `{{1,2,3,4}, {5,6,7,0}, {9,2,0,4}}`
+
+#### 🔍 PHASE 1: MARK ORIGINAL ZEROS AS -1
+
+```
+Step 1: Scan for zeros and mark as -1
+┌─────────────────────┐    Original zeros found at:
+│  1   2   3   4  │   │    - Position (1,3) = 0
+│  5   6   7  -1  │   │    - Position (2,2) = 0
+│  9   2  -1   4  │   │    
+└─────────────────────┘    
+Current state: {{1,2,3,4}, {5,6,7,-1}, {9,2,-1,4}}
+```
+
+#### 🌊 PHASE 2: SPREAD CONTAMINATION WITH WHILE LOOP
+
+```
+Iteration 1: Spread from each -1
+┌─────────────────────┐    Found -1 at (1,3):
+│  1   2   3  -1  │   │    - Mark row 1: {5,6,7,-1} → {-1,-1,-1,-1}
+│ -1  -1  -1  -1  │   │    - Mark col 3: {4,-1,4} → {-1,-1,-1}
+│ -1   2  -1  -1  │   │    
+└─────────────────────┘    
+After iteration 1: {{1,2,3,-1}, {-1,-1,-1,-1}, {-1,2,-1,-1}}
+```
+
+```
+Iteration 2: Spread from newly created -1s
+┌─────────────────────┐    Found -1 at (0,3), (2,0):
+│ -1   2  -1  -1  │   │    - Mark remaining positions
+│ -1  -1  -1  -1  │   │    - Mark col 0: {1,-1,-1} → {-1,-1,-1}
+│ -1  -1  -1  -1  │   │    - Mark col 2: {3,-1,-1} → {-1,-1,-1}
+└─────────────────────┘    
+After iteration 2: {{-1,2,-1,-1}, {-1,-1,-1,-1}, {-1,-1,-1,-1}}
+```
+
+```
+Iteration 3: Final spread
+┌─────────────────────┐    Only position (0,1) remains:
+│ -1  -1  -1  -1  │   │    - Mark col 1: {2,-1,-1} → {-1,-1,-1}
+│ -1  -1  -1  -1  │   │    
+│ -1  -1  -1  -1  │   │    No more changes needed!
+└─────────────────────┘    
+After iteration 3: {{-1,-1,-1,-1}, {-1,-1,-1,-1}, {-1,-1,-1,-1}}
+```
+
+#### 🎯 PHASE 3: CONVERT ALL -1s BACK TO 0s
+
+```
+Final Step: Convert all -1s to 0s
+┌─────────────────────┐    
+│  0   0   0   0  │   │    Wait... this doesn't look right!
+│  0   0   0   0  │   │    This approach has a flaw - it spreads
+│  0   0   0   0  │   │    too aggressively!
+└─────────────────────┘    
+```
+
+### ⚠️ **Important Note About This Approach**
+
+The above approach has a **major flaw** - it spreads contamination too aggressively and would turn the entire matrix to zeros in most cases. Let me show you a **corrected version** that's actually useful:
+
+### 🛠️ **Corrected Approach 3: Smart In-Place Marking**
+
+Instead of the flawed approach above, here's a better version that uses the constraint that matrix values are non-negative:
+
+```java
+public class Solution {
+    public void setZeroesInPlace(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) {
+            return;
+        }
+        
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        
+        // Phase 1: Mark zeros by setting affected cells to a special value
+        // We'll use Integer.MIN_VALUE as our marker (assuming positive integers only)
+        System.out.println("🔍 PHASE 1: Marking affected positions...");
+        
+        // First pass: find all zeros and mark their rows/columns
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (matrix[i][j] == 0) {
+                    System.out.println("   Found zero at (" + i + "," + j + ")");
+                    
+                    // Mark entire row (except original zeros)
+                    for (int k = 0; k < cols; k++) {
+                        if (matrix[i][k] != 0) {
+                            matrix[i][k] = Integer.MIN_VALUE;
+                        }
+                    }
+                    
+                    // Mark entire column (except original zeros)  
+                    for (int k = 0; k < rows; k++) {
+                        if (matrix[k][j] != 0) {
+                            matrix[k][j] = Integer.MIN_VALUE;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Phase 2: Convert all markers to zeros
+        System.out.println("\n🎯 PHASE 2: Converting markers to zeros...");
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (matrix[i][j] == Integer.MIN_VALUE) {
+                    matrix[i][j] = 0;
+                    System.out.println("   Converted marker at (" + i + "," + j + ") to 0");
+                }
+            }
+        }
+    }
+}
+```
+
+### 🎬 Corrected Visual Walkthrough
+
+Starting with: `{{1,2,3,4}, {5,6,7,0}, {9,2,0,4}}`
+
+```
+Step 1: Find zero at (1,3)
+┌─────────────────────────────┐    Mark row 1 and column 3:
+│  1   2   3   MIN │           │    - Row 1: {5,6,7,0} → {MIN,MIN,MIN,0}
+│ MIN MIN MIN   0  │           │    - Col 3: {4,0,4} → {MIN,0,MIN}
+│  9   2   0  MIN  │           │    
+└─────────────────────────────┘    
+Current: {{1,2,3,MIN}, {MIN,MIN,MIN,0}, {9,2,0,MIN}}
+```
+
+```
+Step 2: Find zero at (2,2)  
+┌─────────────────────────────┐    Mark row 2 and column 2:
+│  1   2  MIN  MIN │           │    - Row 2: {9,2,0,MIN} → {MIN,MIN,0,MIN}
+│ MIN MIN MIN   0  │           │    - Col 2: {3,MIN,0} → {MIN,MIN,0}
+│ MIN MIN   0  MIN │           │    
+└─────────────────────────────┘    
+Current: {{1,2,MIN,MIN}, {MIN,MIN,MIN,0}, {MIN,MIN,0,MIN}}
+```
+
+```
+Step 3: Convert all MIN values to 0
+┌─────────────────────┐    Final result:
+│  1   2   0   0  │   │    {{1,2,0,0}, 
+│  0   0   0   0  │   │     {0,0,0,0}, 
+│  0   0   0   0  │   │     {0,0,0,0}}
+└─────────────────────┘    
+```
+
+### ⚡ **Why This Approach Works Better:**
+1. **Single Pass Marking:** We mark affected positions in one pass
+2. **Preserves Original Zeros:** We don't overwrite original zeros during marking
+3. **Clear Distinction:** Uses Integer.MIN_VALUE to distinguish markers from real data
+4. **Simple Conversion:** Final pass just converts markers to zeros
+
+### ⚠️ **Limitations:**
+- **Assumes Non-Negative Values:** If matrix can contain Integer.MIN_VALUE, this breaks
+- **Not Truly Constant Space:** Still modifies the matrix during processing
+- **Less Elegant:** More straightforward but less clever than the margin approach
+
+---
+
 ## ⚡ Complexity Analysis
 
 ### 🕐 Time Complexity
@@ -512,10 +724,11 @@ Both approaches: **O(m × n)** where m = rows, n = columns
 
 ### 📊 Performance Comparison
 
-| Approach | Time | Space | Readability | Interview Score |
-|----------|------|-------|-------------|-----------------|
-| Simple | O(m×n) | O(m+n) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Optimized | O(m×n) | O(1) | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Approach | Time | Space | Readability | Interview Score | Notes |
+|----------|------|-------|-------------|-----------------|-------|
+| Simple (Extra Space) | O(m×n) | O(m+n) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Easy to understand |
+| Optimized (Margins) | O(m×n) | O(1) | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Most elegant solution |
+| In-Place Marking | O(m×n²) | O(1) | ⭐⭐⭐⭐ | ⭐⭐ | Less efficient, has constraints |
 
 ---
 
