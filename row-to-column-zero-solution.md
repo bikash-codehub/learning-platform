@@ -422,6 +422,8 @@ Step 12: Check if we need to zero first column
 
 ### 💻 Optimized Java Code with Detailed Comments
 ```java
+import java.util.Arrays;
+
 public class Solution {
     public void setZeroesOptimized(int[][] matrix) {
         if (matrix == null || matrix.length == 0) {
@@ -530,93 +532,112 @@ public class Solution {
 
 ---
 
-## 🚀 Approach 3: Alternative Optimized Way (In-Place Marking)
+## 🚀 Approach 3: Row-Column Sequential Marking
 
-### 🎯 The Creative Strategy
-This approach uses a clever trick: **mark zeros by changing them to -1 temporarily**, then use a while loop to convert all -1s back to 0s while spreading the contamination.
+### 🎯 The Simple Strategy
+This approach uses a straightforward 3-step process:
+1. **🔍 ROW-WISE:** Traverse each row, when you find a 0, mark other elements in that row as -1 (keep 0s as 0s)
+2. **🔍 COLUMN-WISE:** Traverse each column, when you find a 0, mark other elements in that column as -1 (keep 0s as 0s)  
+3. **🎯 CONVERT:** Change all -1s back to 0s
 
-**Key Insight:** We use -1 as a temporary marker to distinguish between original zeros and newly created zeros.
-
-### 🧠 The Clever Process
-
-```
-Step-by-step idea:
-1. 🔍 Find zeros and mark them as -1
-2. 🌊 For each -1, spread contamination (set row/column to -1)  
-3. 🔄 Keep spreading until no new -1s are created
-4. 🎯 Convert all -1s back to 0s
-```
+**Key Insight:** We use -1 as a temporary marker to distinguish between original zeros and elements that need to become zero.
 
 ### 🎬 Animated Step-by-Step Walkthrough
 
 Starting with Java 2D array: `{{1,2,3,4}, {5,6,7,0}, {9,2,0,4}}`
 
-#### 🔍 PHASE 1: MARK ORIGINAL ZEROS AS -1
+#### 🔍 PHASE 1: ROW-WISE TRAVERSAL
 
 ```
-Step 1: Scan for zeros and mark as -1
-┌─────────────────────┐    Original zeros found at:
-│  1   2   3   4  │   │    - Position (1,3) = 0
-│  5   6   7  -1  │   │    - Position (2,2) = 0
-│  9   2  -1   4  │   │    
+Step 1: Process Row 0 - [1,2,3,4]
+┌─────────────────────┐    No zeros found in row 0
+│  1   2   3   4  │   │    → No changes needed
+│  5   6   7   0  │   │    
+│  9   2   0   4  │   │    
 └─────────────────────┘    
-Current state: {{1,2,3,4}, {5,6,7,-1}, {9,2,-1,4}}
+Current: {{1,2,3,4}, {5,6,7,0}, {9,2,0,4}}
 ```
 
-#### 🌊 PHASE 2: SPREAD CONTAMINATION WITH WHILE LOOP
-
 ```
-Iteration 1: Spread from each -1
-┌─────────────────────┐    Found -1 at (1,3):
-│  1   2   3  -1  │   │    - Mark row 1: {5,6,7,-1} → {-1,-1,-1,-1}
-│ -1  -1  -1  -1  │   │    - Mark col 3: {4,-1,4} → {-1,-1,-1}
-│ -1   2  -1  -1  │   │    
+Step 2: Process Row 1 - [5,6,7,0]
+┌─────────────────────┐    Zero found at position (1,3)!
+│  1   2   3   4  │   │    → Mark other elements in row 1 as -1
+│ [-1][-1][-1] 0  │   │    → Keep the 0 as 0
+│  9   2   0   4  │   │    
 └─────────────────────┘    
-After iteration 1: {{1,2,3,-1}, {-1,-1,-1,-1}, {-1,2,-1,-1}}
+Current: {{1,2,3,4}, {-1,-1,-1,0}, {9,2,0,4}}
 ```
 
 ```
-Iteration 2: Spread from newly created -1s
-┌─────────────────────┐    Found -1 at (0,3), (2,0):
-│ -1   2  -1  -1  │   │    - Mark remaining positions
-│ -1  -1  -1  -1  │   │    - Mark col 0: {1,-1,-1} → {-1,-1,-1}
-│ -1  -1  -1  -1  │   │    - Mark col 2: {3,-1,-1} → {-1,-1,-1}
+Step 3: Process Row 2 - [9,2,0,4]
+┌─────────────────────┐    Zero found at position (2,2)!
+│  1   2   3   4  │   │    → Mark other elements in row 2 as -1
+│ -1  -1  -1   0  │   │    → Keep the 0 as 0
+│[-1][-1] 0 [-1] │   │    
 └─────────────────────┘    
-After iteration 2: {{-1,2,-1,-1}, {-1,-1,-1,-1}, {-1,-1,-1,-1}}
+Current: {{1,2,3,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}
 ```
 
+#### 🔍 PHASE 2: COLUMN-WISE TRAVERSAL
+
 ```
-Iteration 3: Final spread
-┌─────────────────────┐    Only position (0,1) remains:
-│ -1  -1  -1  -1  │   │    - Mark col 1: {2,-1,-1} → {-1,-1,-1}
-│ -1  -1  -1  -1  │   │    
-│ -1  -1  -1  -1  │   │    No more changes needed!
+Step 4: Process Column 0 - [1,-1,-1]
+┌─────────────────────┐    No zeros found in column 0
+│  1   2   3   4  │   │    → No changes needed
+│ -1  -1  -1   0  │   │    
+│ -1  -1   0  -1  │   │    
 └─────────────────────┘    
-After iteration 3: {{-1,-1,-1,-1}, {-1,-1,-1,-1}, {-1,-1,-1,-1}}
+Current: {{1,2,3,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}
 ```
 
-#### 🎯 PHASE 3: CONVERT ALL -1s BACK TO 0s
+```
+Step 5: Process Column 1 - [2,-1,-1]
+┌─────────────────────┐    No zeros found in column 1
+│  1   2   3   4  │   │    → No changes needed
+│ -1  -1  -1   0  │   │    
+│ -1  -1   0  -1  │   │    
+└─────────────────────┘    
+Current: {{1,2,3,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}
+```
 
 ```
-Final Step: Convert all -1s to 0s
-┌─────────────────────┐    
-│  0   0   0   0  │   │    Wait... this doesn't look right!
-│  0   0   0   0  │   │    This approach has a flaw - it spreads
-│  0   0   0   0  │   │    too aggressively!
+Step 6: Process Column 2 - [3,-1,0]
+┌─────────────────────┐    Zero found at position (2,2)!
+│  1   2 [-1]  4  │   │    → Mark other elements in column 2 as -1
+│ -1  -1  -1   0  │   │    → Already -1, no change
+│ -1  -1   0  -1  │   │    → Keep the 0 as 0
+└─────────────────────┘    
+Current: {{1,2,-1,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}
+```
+
+```
+Step 7: Process Column 3 - [4,0,-1]
+┌─────────────────────┐    Zero found at position (1,3)!
+│  1   2  -1 [-1] │   │    → Mark other elements in column 3 as -1
+│ -1  -1  -1   0  │   │    → Keep the 0 as 0
+│ -1  -1   0  -1  │   │    → Already -1, no change
+└─────────────────────┘    
+Current: {{1,2,-1,-1}, {-1,-1,-1,0}, {-1,-1,0,-1}}
+```
+
+#### 🎯 PHASE 3: CONVERT ALL -1s TO 0s
+
+```
+Step 8: Final conversion
+┌─────────────────────┐    Convert all -1s to 0s:
+│  1   2   0   0  │   │    Final result: {{1,2,0,0},
+│  0   0   0   0  │   │                   {0,0,0,0},
+│  0   0   0   0  │   │                   {0,0,0,0}}
 └─────────────────────┘    
 ```
 
-### ⚠️ **Important Note About This Approach**
-
-The above approach has a **major flaw** - it spreads contamination too aggressively and would turn the entire matrix to zeros in most cases. Let me show you a **corrected version** that's actually useful:
-
-### 🛠️ **Corrected Approach 3: Smart In-Place Marking**
-
-Instead of the flawed approach above, here's a better version that uses the constraint that matrix values are non-negative:
+### 💻 Java Implementation
 
 ```java
+import java.util.Arrays;
+
 public class Solution {
-    public void setZeroesInPlace(int[][] matrix) {
+    public void setZeroesRowColumn(int[][] matrix) {
         if (matrix == null || matrix.length == 0) {
             return;
         }
@@ -624,103 +645,121 @@ public class Solution {
         int rows = matrix.length;
         int cols = matrix[0].length;
         
-        // Phase 1: Mark zeros by setting affected cells to a special value
-        // We'll use Integer.MIN_VALUE as our marker (assuming positive integers only)
-        System.out.println("🔍 PHASE 1: Marking affected positions...");
-        
-        // First pass: find all zeros and mark their rows/columns
+        // Phase 1: Row-wise traversal
+        System.out.println("🔍 PHASE 1: Row-wise traversal...");
         for (int i = 0; i < rows; i++) {
+            System.out.println("   Processing row " + i + ": " + Arrays.toString(matrix[i]));
+            
+            // Check if this row has any zeros
+            boolean hasZero = false;
             for (int j = 0; j < cols; j++) {
                 if (matrix[i][j] == 0) {
-                    System.out.println("   Found zero at (" + i + "," + j + ")");
-                    
-                    // Mark entire row (except original zeros)
-                    for (int k = 0; k < cols; k++) {
-                        if (matrix[i][k] != 0) {
-                            matrix[i][k] = Integer.MIN_VALUE;
-                        }
+                    hasZero = true;
+                    break;
+                }
+            }
+            
+            // If row has zero, mark other elements as -1
+            if (hasZero) {
+                System.out.println("     → Found zero in row " + i + ", marking others as -1");
+                for (int j = 0; j < cols; j++) {
+                    if (matrix[i][j] != 0) {  // Don't change original zeros
+                        matrix[i][j] = -1;
                     }
-                    
-                    // Mark entire column (except original zeros)  
-                    for (int k = 0; k < rows; k++) {
-                        if (matrix[k][j] != 0) {
-                            matrix[k][j] = Integer.MIN_VALUE;
-                        }
+                }
+                System.out.println("     → Row " + i + " after marking: " + Arrays.toString(matrix[i]));
+            } else {
+                System.out.println("     → No zeros found in row " + i);
+            }
+        }
+        
+        // Phase 2: Column-wise traversal
+        System.out.println("\n🔍 PHASE 2: Column-wise traversal...");
+        for (int j = 0; j < cols; j++) {
+            System.out.print("   Processing column " + j + ": [");
+            for (int i = 0; i < rows; i++) {
+                System.out.print(matrix[i][j] + (i < rows-1 ? "," : ""));
+            }
+            System.out.println("]");
+            
+            // Check if this column has any zeros
+            boolean hasZero = false;
+            for (int i = 0; i < rows; i++) {
+                if (matrix[i][j] == 0) {
+                    hasZero = true;
+                    break;
+                }
+            }
+            
+            // If column has zero, mark other elements as -1
+            if (hasZero) {
+                System.out.println("     → Found zero in column " + j + ", marking others as -1");
+                for (int i = 0; i < rows; i++) {
+                    if (matrix[i][j] != 0) {  // Don't change original zeros
+                        matrix[i][j] = -1;
                     }
+                }
+            } else {
+                System.out.println("     → No zeros found in column " + j);
+            }
+        }
+        
+        // Phase 3: Convert all -1s to 0s
+        System.out.println("\n🎯 PHASE 3: Converting all -1s to 0s...");
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (matrix[i][j] == -1) {
+                    matrix[i][j] = 0;
+                    System.out.println("   Converted position (" + i + "," + j + ") from -1 to 0");
                 }
             }
         }
         
-        // Phase 2: Convert all markers to zeros
-        System.out.println("\n🎯 PHASE 2: Converting markers to zeros...");
+        System.out.println("\n✅ Final result:");
         for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (matrix[i][j] == Integer.MIN_VALUE) {
-                    matrix[i][j] = 0;
-                    System.out.println("   Converted marker at (" + i + "," + j + ") to 0");
-                }
-            }
+            System.out.println("   " + Arrays.toString(matrix[i]));
         }
     }
 }
 ```
 
-### 🎬 Corrected Visual Walkthrough
+### 🎯 Detailed Dry Run Table
 
-Starting with: `{{1,2,3,4}, {5,6,7,0}, {9,2,0,4}}`
+| Phase | Step | Action | Matrix State | Notes |
+|-------|------|--------|--------------|-------|
+| 1 | 1 | Process Row 0 | `{{1,2,3,4}, {5,6,7,0}, {9,2,0,4}}` | No zeros found |
+| 1 | 2 | Process Row 1 | `{{1,2,3,4}, {-1,-1,-1,0}, {9,2,0,4}}` | Zero at (1,3), marked others as -1 |
+| 1 | 3 | Process Row 2 | `{{1,2,3,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}` | Zero at (2,2), marked others as -1 |
+| 2 | 4 | Process Col 0 | `{{1,2,3,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}` | No zeros found |
+| 2 | 5 | Process Col 1 | `{{1,2,3,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}` | No zeros found |
+| 2 | 6 | Process Col 2 | `{{1,2,-1,4}, {-1,-1,-1,0}, {-1,-1,0,-1}}` | Zero at (2,2), marked (0,2) as -1 |
+| 2 | 7 | Process Col 3 | `{{1,2,-1,-1}, {-1,-1,-1,0}, {-1,-1,0,-1}}` | Zero at (1,3), marked (0,3) as -1 |
+| 3 | 8 | Convert -1s | `{{1,2,0,0}, {0,0,0,0}, {0,0,0,0}}` | All -1s converted to 0s |
 
-```
-Step 1: Find zero at (1,3)
-┌─────────────────────────────┐    Mark row 1 and column 3:
-│  1   2   3   MIN │           │    - Row 1: {5,6,7,0} → {MIN,MIN,MIN,0}
-│ MIN MIN MIN   0  │           │    - Col 3: {4,0,4} → {MIN,0,MIN}
-│  9   2   0  MIN  │           │    
-└─────────────────────────────┘    
-Current: {{1,2,3,MIN}, {MIN,MIN,MIN,0}, {9,2,0,MIN}}
-```
-
-```
-Step 2: Find zero at (2,2)  
-┌─────────────────────────────┐    Mark row 2 and column 2:
-│  1   2  MIN  MIN │           │    - Row 2: {9,2,0,MIN} → {MIN,MIN,0,MIN}
-│ MIN MIN MIN   0  │           │    - Col 2: {3,MIN,0} → {MIN,MIN,0}
-│ MIN MIN   0  MIN │           │    
-└─────────────────────────────┘    
-Current: {{1,2,MIN,MIN}, {MIN,MIN,MIN,0}, {MIN,MIN,0,MIN}}
-```
-
-```
-Step 3: Convert all MIN values to 0
-┌─────────────────────┐    Final result:
-│  1   2   0   0  │   │    {{1,2,0,0}, 
-│  0   0   0   0  │   │     {0,0,0,0}, 
-│  0   0   0   0  │   │     {0,0,0,0}}
-└─────────────────────┘    
-```
-
-### ⚡ **Why This Approach Works Better:**
-1. **Single Pass Marking:** We mark affected positions in one pass
-2. **Preserves Original Zeros:** We don't overwrite original zeros during marking
-3. **Clear Distinction:** Uses Integer.MIN_VALUE to distinguish markers from real data
-4. **Simple Conversion:** Final pass just converts markers to zeros
+### ⚡ **Why This Approach Works:**
+1. **Simple Logic:** Easy to understand - process rows first, then columns
+2. **Clear Marking:** Uses -1 to distinguish between original zeros and new zeros
+3. **No Conflicts:** Processing rows first, then columns avoids marking conflicts
+4. **Preserves Originals:** Never overwrites original zeros during marking phase
 
 ### ⚠️ **Limitations:**
-- **Assumes Non-Negative Values:** If matrix can contain Integer.MIN_VALUE, this breaks
-- **Not Truly Constant Space:** Still modifies the matrix during processing
-- **Less Elegant:** More straightforward but less clever than the margin approach
+- **Assumes Non-Negative Values:** Matrix cannot contain -1 values originally
+- **Time Complexity:** O(m×n) but with higher constant factor due to multiple passes
+- **Space Complexity:** O(1) but modifies the matrix during processing
 
 ---
 
 ## ⚡ Complexity Analysis
 
 ### 🕐 Time Complexity
-Both approaches: **O(m × n)** where m = rows, n = columns
-- We visit each cell at least once
-- In worst case, we might visit each cell twice (once to find zeros, once to set zeros)
+All three approaches: **O(m × n)** where m = rows, n = columns
+- **Simple & Optimized:** We visit each cell at least once, at most twice
+- **Row-Column Marking:** Multiple passes (rows + columns + conversion) but still O(m×n)
 
 ### 💾 Space Complexity
 - **Simple Approach:** O(m + n) - We store row and column indices
 - **Optimized Approach:** O(1) - We only use the matrix itself plus a few variables
+- **Row-Column Marking:** O(1) - Uses -1 as temporary markers within the matrix
 
 ### 📊 Performance Comparison
 
@@ -728,7 +767,7 @@ Both approaches: **O(m × n)** where m = rows, n = columns
 |----------|------|-------|-------------|-----------------|-------|
 | Simple (Extra Space) | O(m×n) | O(m+n) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Easy to understand |
 | Optimized (Margins) | O(m×n) | O(1) | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Most elegant solution |
-| In-Place Marking | O(m×n²) | O(1) | ⭐⭐⭐⭐ | ⭐⭐ | Less efficient, has constraints |
+| Row-Column Marking | O(m×n) | O(1) | ⭐⭐⭐⭐ | ⭐⭐⭐ | Simple 3-step process |
 
 ---
 
